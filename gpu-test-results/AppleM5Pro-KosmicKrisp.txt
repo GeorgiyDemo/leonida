@@ -1,0 +1,24 @@
+GPU:        Apple M5 Pro (Apple GPU, 16 cores, Metal 4) through KosmicKrisp, subgroup 32..32
+Driver:     KosmicKrisp (Mesa 26.3.1, Homebrew), Vulkan 1.4.363, through vulkan-loader 1.4.363
+Subgroup:   32..32 (no 64-wide, no mesh, no shaderFloat64, no geometry stage, no PerVertexKHR)
+OS:         macOS 26.7.3 (25G342), arm64
+Commit:     d42773d07 (main, 2026-11-24)
+Tools:      llvm-mc 23.1.6 (Homebrew, AMDGPU target), SPIRV-Tools v2026.4, Apple clang 21.0.0,
+            CMake 4.5.1, Python 3.15.2
+build.py:   280 shaders: 280 translated, 280 pass spirv-val (six mesh fixtures not built: no VK_EXT_mesh_shader)
+check.py:   168 of 219 pass, 44 skipped, 7 failed
+run_gpu_tests.py: 178/248 passed, 64 skipped, 6 failed
+            209/248 passed, 33 skipped, 6 failed (LEONIDA_W64_EMULATE=1)
+ctest:      72/72 passed, 2 skipped (shader_library_corpus, vk_sync_validation)
+Failed:     cs_bvh and cs_bvh32: "out[0..7] = 104 72 64 2143289344 ...", the NaN word 0x7fc00000 where
+            0xffffffff belongs. Pass with #137 on this machine.
+            cs_imgload_tfe and cs_imgload_d16_tfe: "r32 sint (sint view): 64 bad, texel(5,3) = 2071".
+            Pass with #291 on this machine.
+            ps_cndmask_sign_mods and ps_valu16_mad_sel: every pixel differs with 0x7fc00000 where a
+            sign or 16-bit pattern belongs; the known KosmicKrisp NaN canonicalisation on Metal seen in
+            the earlier Apple entries.
+check.py only: cs_fmt_all, word 293: expected 0x80007c01, got 0x80007e00.
+Note:       cs_fma_fused passes here, unlike on MoltenVK 1.4.2.
+Skipped:    31 "full 64-wide compute subgroups unavailable", two wave64 pixel tests, two Float64
+            fixtures, three mesh fixtures, the "64 lanes on request" test; run_gpu_tests.py's 64 skips
+            are those plus the fixtures the d3d12_* tests run.
